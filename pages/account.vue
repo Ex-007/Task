@@ -1,29 +1,65 @@
 <template>
     <div>
         <div class="registration">
-            <input type="text" placeholder="Enter email address" v-model="email">
-            <input type="text" placeholder="Enter password" v-model="password">
-            <button @click="registerUser">Register</button>
+            <input type="text" placeholder="Enter email address" v-model="authProperties.emailFirst">
+            <input type="text" placeholder="Enter Your Username" v-model="authProperties.usernameFirst">
+            <input type="password" placeholder="Enter password" v-model="authProperties.passwordFirst">
+            <button @click="registerNewUSer" :disabled="authentication.isLoading">{{authentication.isLoading ? "Registering..." : "Register"}}</button>
         </div>
     </div>
 </template>
 
 <script setup>
     import { ref } from 'vue';
-    import {useAuthStore} from '@/stores/auth';
+    import { useAuthStore } from '~/stores/auth';
+    import { useRouter } from 'vue-router';
+    const router = useRouter()
+    const authentication = useAuthStore()
 
-    const email = ref('');
-    const password = ref('');
+    const authProperties = ref({
+        emailFirst: '',
+        passwordFirst: '',
+        usernameFirst: '',
+    })
 
-    const registerUser = () => {
-        useAuthStore().register(email.value, password.value);
-        if(useAuthStore().error){
-            alert(useAuthStore().error);
-        }
-        if(useAuthStore().isAuthenticated){
-            alert('User registered successfully');
+
+    const registerNewUSer = async () => {
+           const email = authProperties.value.emailFirst
+           const password = authProperties.value.passwordFirst
+           const username = authProperties.value.usernameFirst
+        try {
+            await authentication.registerUser(email, password, username)
+            if(authentication.canProceed){
+                alert('User successfully registered')
+                router.push('/')
+            }else{
+                alert(authentication.error)
+            }
+            
+        } catch (error) {
+            console.log(error)
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </script>
